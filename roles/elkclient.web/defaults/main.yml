@@ -1,0 +1,8 @@
+---
+# defaults file for elkclient.web
+
+master: "52.39.185.26, 54.70.77.44, 54.184.107.218"
+client: "34.223.248.69, 54.202.80.119"
+nodes: "master1", "master2", "master3", "client1", "client2"
+
+...

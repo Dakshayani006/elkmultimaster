@@ -1,0 +1,9 @@
+---
+# handlers file for elkclient.web
+
+- name: restart elasticsearch
+  service: name=elasticsearch state=restarted
+
+- name: restart filebeat
+  service: name=filebeat state=restarted
+...

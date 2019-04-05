@@ -1,0 +1,6 @@
+---
+# tasks file for elk.web
+
+ - import_tasks: elkmaster.yml
+
+...

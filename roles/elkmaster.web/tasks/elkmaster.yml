@@ -1,0 +1,84 @@
+---
+  - name: install the latest version of java
+    yum:
+      name: java-1.8.0
+      state: present
+
+  - name: install the latest version of wget
+    yum:
+      name: wget
+      state: present
+
+  - name: Import Elasticsearch public GPG key into rpm
+    rpm_key: state=present key=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+  - name: Copying elk repo
+    template: src=elk.repo.j2 dest=/etc/yum.repos.d/elk.repo
+
+  - name: Install elasticsearch
+    yum: name=elasticsearch state=installed
+  
+  - name: edit elasticsearch.yml
+    template: src=elasticsearch.yml.j2 dest=/etc/elasticsearch/elasticsearch.yml 
+    notify: restart elasticsearch
+  
+  - name: Reload systemd daemons. Not cleanest way thought
+    systemd:
+      daemon_reload: True
+  
+  - name: Start service elasticsearch
+    service:
+      name: elasticsearch
+      state: started
+      enabled: yes
+
+  - name: Install Logstash
+    yum: name=logstash state=installed
+
+  - name: Adding private IP in openssl.cnf
+    lineinfile: 'dest=/etc/pki/tls/openssl.cnf regexp=subjectAltName line="subjectAltName = IP: {{ master }}"'
+
+  - name: Generating certificates
+    shell:
+      openssl req -config /etc/pki/tls/openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout /etc/pki/tls/private/logstash-forwarder.key -out /etc/pki/tls/certs/logstash-forwarder.crt
+    args:
+      chdir: /etc/pki/tls
+      creates: /etc/pki/tls/certs/logstash-forwarder.crt
+
+  - name: Configure Logstash input
+    copy: src=filebeat-input.conf dest=/etc/logstash/conf.d/filebeat-input.conf
+
+  - name: Configure Logstash syslog filter
+    copy: src=syslog-filter.conf dest=/etc/logstash/conf.d/syslog-filter.conf
+
+  - name: Configure Logstash ouput
+    copy: src=output-elasticsearch.conf dest=/etc/logstash/conf.d/output-elasticsearch.conf
+  
+  - name: Start service logstash
+    service:
+      name: logstash
+      state: started
+      enabled: yes
+    notify: restart logstash
+
+  - name: Install kibana
+    yum: name=kibana state=installed
+
+  - name: Configure kibana
+    template:
+      src: kibana.yml.j2
+      dest: /etc/kibana/kibana.yml
+      owner: root
+      group: root
+      mode: '0644'
+  
+  - name: Start service kibana
+    service:
+      name: kibana
+      state: started
+      enabled: yes
+    notify: restart kibana
+
+ 
+...  
+

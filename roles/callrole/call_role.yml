@@ -1,0 +1,15 @@
+---
+ - hosts: all
+   tasks: 
+   
+ - hosts: group
+   name: master nodes
+   roles:
+    - elk.web
+
+ - hosts: group1
+   name: slave nodes
+   roles:
+    - elkclient.web
+
+...

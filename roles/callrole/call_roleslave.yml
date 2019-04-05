@@ -1,0 +1,5 @@
+---
+- hosts: psslaves6
+  roles:
+  - postslave.web
+...

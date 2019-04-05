@@ -1,0 +1,7 @@
+---
+- hosts: psmasters6
+  roles:
+  - postgress.web
+...
+
+
